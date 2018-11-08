@@ -15,3 +15,8 @@ def visualize_coreference_resolution(data):
     print("Printing resolved...")
     print(doc._.coref_resolved)
     print()
+
+
+def run_coreference_resolution(data):
+    doc = nlp(data)
+    return doc._.coref_resolved

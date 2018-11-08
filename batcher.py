@@ -23,6 +23,7 @@ import time
 import numpy as np
 import tensorflow as tf
 import data
+from coreference_resolution import run_coreference_resolution
 
 
 class Example(object):
@@ -52,6 +53,7 @@ class Example(object):
 
     # Process the abstract
     abstract = ' '.join(abstract_sentences) # string
+    abstract = run_coreference_resolution(abstract)
     abstract_words = abstract.split() # list of strings
     abs_ids = [vocab.word2id(w) for w in abstract_words] # list of word ids; OOVs are represented by the id for UNK token
 
