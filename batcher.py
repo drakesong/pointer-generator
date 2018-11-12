@@ -52,14 +52,22 @@ class Example(object):
     self.enc_len = len(article_words) # store the length after truncation but before padding
     self.enc_input = [vocab.word2id(w) for w in article_words] # list of word ids; OOVs are represented by the id for UNK token
 
-    reference_cluster_dir = os.path.join(log_path, "reference")
-    if not os.path.exists(reference_cluster_dir): os.makedirs(reference_cluster_dir)
+    if log_path is not None:
+        # for encoding
+        reference_cluster_dir = os.path.join(log_path, "reference")
+        if not os.path.exists(reference_cluster_dir): os.makedirs(reference_cluster_dir)
 
-    # Process the abstract
-    abstract = ' '.join(abstract_sentences) # string
-    abstract = run_coreference_resolution(abstract, reference_cluster_dir)
-    abstract_words = abstract.split() # list of strings
-    abs_ids = [vocab.word2id(w) for w in abstract_words] # list of word ids; OOVs are represented by the id for UNK token
+        # Process the abstract
+        abstract = ' '.join(abstract_sentences) # string
+        abstract = run_coreference_resolution(abstract, reference_cluster_dir)
+        abstract_words = abstract.split() # list of strings
+        abs_ids = [vocab.word2id(w) for w in abstract_words] # list of word ids; OOVs are represented by the id for UNK token
+    else:
+        # for decoding
+        # Process the abstract
+        abstract = ' '.join(abstract_sentences) # string
+        abstract_words = abstract.split() # list of strings
+        abs_ids = [vocab.word2id(w) for w in abstract_words] # list of word ids; OOVs are represented by the id for UNK token
 
     # Get the decoder input sequence and target sequence
     self.dec_input, self.target = self.get_dec_inp_targ_seqs(abs_ids, hps.max_dec_steps, start_decoding, stop_decoding)
