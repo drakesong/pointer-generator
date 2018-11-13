@@ -7,21 +7,6 @@ import tensorflow as tf
 
 nlp = spacy.load('en_coref_md')
 
-def visualize_coreference_resolution(data):
-    doc = nlp(data)
-
-    print()
-    print("Printing document...")
-    print(doc)
-    print()
-    print("Printing clusters...")
-    print(doc._.coref_clusters)
-    print()
-    print("Printing resolved...")
-    print(doc._.coref_resolved)
-    print()
-
-
 def run_coreference_resolution(data, dir):
     doc = nlp(data)
     save_clusters_to_file(dir, doc)
@@ -30,19 +15,30 @@ def run_coreference_resolution(data, dir):
 
 
 def save_clusters_to_file(dir, doc):
-    file_name = ''.join(c for c in str(doc)[0:75] if c.isalnum())
-    reference_cluster_file = os.path.join(dir, "%s.txt" % file_name)
+    dict = {}
     clusters = doc._.coref_clusters
-
     if clusters == None:
         return
+    else:
+        for cluster in clusters:
+            list = []
+            mentions = cluster.mentions
+            for mention in mentions:
+                list.append(str(mention))
+            dict[str(cluster.main)] = list
 
+    reference_cluster_file = create_file_path(dir, doc)
     while True:
         try:
             with open(reference_cluster_file, "a+") as f:
-                f.write(str(clusters))
+                f.write(str(dict))
                 break
         except (OSError, IOError):
             while not os.path.exists(reference_cluster_file):
                 tf.logging.info("%s does not exist." % reference_cluster_file)
                 time.sleep(0.1)
+
+
+def create_file_path(dir, doc):
+    file_name = ''.join(c for c in str(doc)[0:75] if c.isalnum())
+    return os.path.join(dir, "%s.txt" % file_name)
