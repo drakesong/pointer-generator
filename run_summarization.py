@@ -301,9 +301,9 @@ def main(unused_argv):
 
   # Create a batcher object that will create minibatches of data
   if hps.mode == 'train':
-    batcher = Batcher(FLAGS.data_path, vocab, hps, FLAGS.log_root, single_pass=FLAGS.single_pass)
+    batcher = Batcher(FLAGS.data_path, vocab, hps, None, single_pass=FLAGS.single_pass)
   else:
-    batcher_decode = Batcher(FLAGS.data_path, vocab, hps, None,  single_pass=FLAGS.single_pass)
+    batcher_decode = Batcher(FLAGS.data_path, vocab, hps, FLAGS.log_root,  single_pass=FLAGS.single_pass)
 
   tf.set_random_seed(111) # a seed value for randomness
 

@@ -26,7 +26,7 @@ import pyrouge
 import util
 import logging
 import numpy as np
-from coreference_resolution import visualize_coreference_resolution
+from coreference_resolution import add_pronouns
 
 FLAGS = tf.app.flags.FLAGS
 
@@ -115,7 +115,7 @@ class BeamSearchDecoder(object):
         self.write_for_rouge(original_abstract_sents, decoded_words, counter) # write ref summary and decoded summary to file, to eval with pyrouge later
         counter += 1 # this is how many examples we've decoded
       else:
-        visualize_coreference_resolution(decoded_output)
+        add_pronouns(self._batcher._log_path, decoded_output)
         print_results(article_withunks, abstract_withunks, decoded_output) # log output to screen
         self.write_for_attnvis(article_withunks, abstract_withunks, decoded_words, best_hyp.attn_dists, best_hyp.p_gens) # write info to .json file for visualization tool
 

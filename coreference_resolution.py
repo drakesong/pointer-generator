@@ -1,20 +1,19 @@
 import spacy
 import os
-import string
-import random
 import time
 import ast
 import re
-import tensorflow as tf
 
 nlp = spacy.load('en_coref_md')
 
-def run_coreference_resolution(data, dir):
+def run_coreference_resolution_for_training(data):
+    return nlp(data)._.coref_resolved if nlp(data)._.has_coref else data
+
+def run_coreference_resolution_for_testing(data, dir):
     doc = nlp(data)
     save_clusters_to_file(dir, doc)
 
-    return doc._.coref_resolved
-
+    return doc._.coref_resolved if doc._.has_coref else data
 
 def save_clusters_to_file(dir, doc):
     d = {}
@@ -37,9 +36,7 @@ def save_clusters_to_file(dir, doc):
                 break
         except (OSError, IOError):
             while not os.path.exists(reference_cluster_file):
-                tf.logging.info("%s does not exist." % reference_cluster_file)
                 time.sleep(0.1)
-
 
 def add_pronouns(dir, data):
     doc = nlp(data)
@@ -75,7 +72,6 @@ def search_for_saved_references(file):
         return saved_clusters if saved_clusters != "None" else None
     except:
         return None
-
 
 def create_file_path(dir, doc):
     file_name = ''.join(c for c in str(doc)[0:75] if c.isalnum())

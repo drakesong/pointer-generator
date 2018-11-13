@@ -24,7 +24,7 @@ import numpy as np
 import tensorflow as tf
 import data
 import os
-from coreference_resolution import run_coreference_resolution
+from coreference_resolution import run_coreference_resolution_for_training, run_coreference_resolution_for_testing
 
 
 class Example(object):
@@ -53,19 +53,19 @@ class Example(object):
     self.enc_input = [vocab.word2id(w) for w in article_words] # list of word ids; OOVs are represented by the id for UNK token
 
     if log_path is not None:
-        # for encoding
+        # For testing
         reference_cluster_dir = os.path.join(log_path, "reference")
         if not os.path.exists(reference_cluster_dir): os.makedirs(reference_cluster_dir)
 
         # Process the abstract
         abstract = ' '.join(abstract_sentences) # string
-        abstract = run_coreference_resolution(abstract, reference_cluster_dir)
+        abstract = run_coreference_resolution_for_testing(abstract, reference_cluster_dir)
         abstract_words = abstract.split() # list of strings
         abs_ids = [vocab.word2id(w) for w in abstract_words] # list of word ids; OOVs are represented by the id for UNK token
     else:
-        # for decoding
         # Process the abstract
         abstract = ' '.join(abstract_sentences) # string
+        abstract = run_coreference_resolution_for_training(abstract)
         abstract_words = abstract.split() # list of strings
         abs_ids = [vocab.word2id(w) for w in abstract_words] # list of word ids; OOVs are represented by the id for UNK token
 
