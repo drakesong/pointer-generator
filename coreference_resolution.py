@@ -34,6 +34,9 @@ def save_clusters_to_file(dir, doc):
     reference_cluster_file = os.path.join(dir, "%s.txt" % file_name)
     clusters = doc._.coref_clusters
 
+    if clusters == None:
+        return
+
     while True:
         try:
             with open(reference_cluster_file, "a+") as f:
