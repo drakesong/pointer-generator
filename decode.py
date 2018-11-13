@@ -25,6 +25,7 @@ import json
 import pyrouge
 import util
 import logging
+import re
 import numpy as np
 from coreference_resolution import add_pronouns
 
@@ -110,12 +111,13 @@ class BeamSearchDecoder(object):
       except ValueError:
         decoded_words = decoded_words
       decoded_output = ' '.join(decoded_words) # single string
+      decoded_output = add_pronouns(self._batcher._log_path, decoded_output)
 
       if FLAGS.single_pass:
+        decoded_words = re.findall(r"[\w']+|[^\s\w]", decoded_output)
         self.write_for_rouge(original_abstract_sents, decoded_words, counter) # write ref summary and decoded summary to file, to eval with pyrouge later
         counter += 1 # this is how many examples we've decoded
       else:
-        decoded_output = add_pronouns(self._batcher._log_path, decoded_output)
         print_results(article_withunks, abstract_withunks, decoded_output) # log output to screen
         self.write_for_attnvis(article_withunks, abstract_withunks, decoded_words, best_hyp.attn_dists, best_hyp.p_gens) # write info to .json file for visualization tool
 
