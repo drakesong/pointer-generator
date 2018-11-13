@@ -43,7 +43,3 @@ def save_clusters_to_file(dir, doc):
             while not os.path.exists(reference_cluster_file):
                 tf.logging.info("%s does not exist." % reference_cluster_file)
                 time.sleep(0.1)
-
-
-def random_file_name_generator():
-    return ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(64))
