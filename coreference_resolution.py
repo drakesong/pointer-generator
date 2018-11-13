@@ -2,7 +2,7 @@ import spacy
 import os
 import string
 import random
-import json
+import time
 import tensorflow as tf
 
 nlp = spacy.load('en_coref_md')
@@ -30,11 +30,19 @@ def run_coreference_resolution(data, dir):
 
 
 def save_clusters_to_file(dir, doc):
-    reference_cluster_file = os.path.join(dir, "%s.json" % random_file_name_generator())
+    file_name = ''.join(c for c in str(doc)[0:75] if c.isalnum())
+    reference_cluster_file = os.path.join(dir, "%s.txt" % file_name)
     clusters = doc._.coref_clusters
 
-    with open(reference_cluster_file, "w") as f:
-        json.dump({str(doc): str(clusters)}, f)
+    while True:
+        try:
+            with open(reference_cluster_file, "a+") as f:
+                f.write(str(clusters))
+                break
+        except (OSError, IOError):
+            while not os.path.exists(reference_cluster_file):
+                tf.logging.info("%s does not exist." % reference_cluster_file)
+                time.sleep(0.1)
 
 
 def random_file_name_generator():
