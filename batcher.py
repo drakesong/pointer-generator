@@ -23,7 +23,7 @@ import time
 import numpy as np
 import tensorflow as tf
 import data
-from coreference_resolution import get_antecedent
+from coreference_resolution import get_antecedent, run_coreference_resolution_for_training, run_coreference_resolution_for_testing
 
 
 class Example(object):
