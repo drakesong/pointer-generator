@@ -1,4 +1,4 @@
-This project was done for my Undergrad Senior Comprehensive Project. This repo looks to improve the existing model by incorporating coreference resolution. More information can be found in this *[blog](https://drakeseniorcomps.blogspot.com/)*.
+### This project was done for my Undergrad Senior Comprehensive Project. This repo looks to improve the existing model by incorporating coreference resolution. More information can be found in this *[blog](https://drakeseniorcomps.blogspot.com/)*.
 
 This repository contains code for the ACL 2017 paper *[Get To The Point: Summarization with Pointer-Generator Networks](https://arxiv.org/abs/1704.04368)*.
 
