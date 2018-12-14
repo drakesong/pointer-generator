@@ -68,6 +68,20 @@ This will repeatedly load random examples from your specified datafile and gener
 
 If you want to run evaluation on the entire validation or test set and get ROUGE scores, set the flag `single_pass=1`. This will go through the entire dataset in order, writing the generated summaries to file, and then run evaluation using [pyrouge](https://pypi.python.org/pypi/pyrouge). (Note this will *not* produce the `attn_vis_data.json` files for the attention visualizer).
 
+### Run Two_Models
+To run two_models:
+
+```
+... --two_models=True
+```
+
+### Run Coreference_Resolution_Pipeline
+To run coreference_resolution_pipeline:
+
+```
+... --coreference_resolution=True
+```
+
 ### Evaluate with ROUGE
 `decode.py` uses the Python package [`pyrouge`](https://pypi.python.org/pypi/pyrouge) to run ROUGE evaluation. `pyrouge` provides an easier-to-use interface for the official Perl ROUGE package, which you must install for `pyrouge` to work. Here are some useful instructions on how to do this:
 * [How to setup Perl ROUGE](http://kavita-ganesan.com/rouge-howto)
