@@ -23,12 +23,14 @@ import time
 import numpy as np
 import tensorflow as tf
 import data
+import os
+from coreference_resolution import run_coreference_resolution_for_training, run_coreference_resolution_for_testing
 
 
 class Example(object):
   """Class representing a train/val/test example for text summarization."""
 
-  def __init__(self, article, abstract_sentences, vocab, hps):
+  def __init__(self, article, abstract_sentences, vocab, hps, log_path):
     """Initializes the Example, performing tokenization and truncation to produce the encoder, decoder and target sequences, which are stored in self.
 
     Args:
@@ -50,10 +52,22 @@ class Example(object):
     self.enc_len = len(article_words) # store the length after truncation but before padding
     self.enc_input = [vocab.word2id(w) for w in article_words] # list of word ids; OOVs are represented by the id for UNK token
 
-    # Process the abstract
-    abstract = ' '.join(abstract_sentences) # string
-    abstract_words = abstract.split() # list of strings
-    abs_ids = [vocab.word2id(w) for w in abstract_words] # list of word ids; OOVs are represented by the id for UNK token
+    if log_path is not None:
+        # For testing
+        reference_cluster_dir = os.path.join(log_path, "reference")
+        if not os.path.exists(reference_cluster_dir): os.makedirs(reference_cluster_dir)
+
+        # Process the abstract
+        abstract = ' '.join(abstract_sentences) # string
+        abstract = run_coreference_resolution_for_testing(abstract, reference_cluster_dir)
+        abstract_words = abstract.split() # list of strings
+        abs_ids = [vocab.word2id(w) for w in abstract_words] # list of word ids; OOVs are represented by the id for UNK token
+    else:
+        # Process the abstract
+        abstract = ' '.join(abstract_sentences) # string
+        abstract = run_coreference_resolution_for_training(abstract)
+        abstract_words = abstract.split() # list of strings
+        abs_ids = [vocab.word2id(w) for w in abstract_words] # list of word ids; OOVs are represented by the id for UNK token
 
     # Get the decoder input sequence and target sequence
     self.dec_input, self.target = self.get_dec_inp_targ_seqs(abs_ids, hps.max_dec_steps, start_decoding, stop_decoding)
@@ -219,18 +233,20 @@ class Batcher(object):
 
   BATCH_QUEUE_MAX = 100 # max number of batches the batch_queue can hold
 
-  def __init__(self, data_path, vocab, hps, single_pass):
+  def __init__(self, data_path, vocab, hps, log_path, single_pass):
     """Initialize the batcher. Start threads that process the data into batches.
 
     Args:
       data_path: tf.Example filepattern.
       vocab: Vocabulary object
       hps: hyperparameters
+      log_path: Path to the log. Used later for coreference resolution.
       single_pass: If True, run through the dataset exactly once (useful for when you want to run evaluation on the dev or test set). Otherwise generate random batches indefinitely (useful for training).
     """
     self._data_path = data_path
     self._vocab = vocab
     self._hps = hps
+    self._log_path = log_path
     self._single_pass = single_pass
 
     # Initialize a queue of Batches waiting to be used, and a queue of Examples waiting to be batched
@@ -303,7 +319,7 @@ class Batcher(object):
           raise Exception("single_pass mode is off but the example generator is out of data; error.")
 
       abstract_sentences = [sent.strip() for sent in data.abstract2sents(abstract)] # Use the <s> and </s> tags in abstract to get a list of sentences.
-      example = Example(article, abstract_sentences, self._vocab, self._hps) # Process into an Example.
+      example = Example(article, abstract_sentences, self._vocab, self._hps, self._log_path) # Process into an Example.
       self._example_queue.put(example) # place the Example in the example queue.
 
 

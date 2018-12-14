@@ -72,6 +72,9 @@ tf.app.flags.DEFINE_boolean('restore_best_model', False, 'Restore the best model
 # Debugging. See https://www.tensorflow.org/programmers_guide/debugger
 tf.app.flags.DEFINE_boolean('debug', False, "Run in tensorflow's debug mode (watches for NaN/inf values)")
 
+# Two_models
+tf.app.flags.DEFINE_boolean('two_models', False, "Run the model from two_models branch.")
+
 
 
 def calc_running_avg_loss(loss, running_avg_loss, summary_writer, step, decay=0.99):
@@ -300,7 +303,13 @@ def main(unused_argv):
   hps = namedtuple("HParams", hps_dict.keys())(**hps_dict)
 
   # Create a batcher object that will create minibatches of data
-  batcher = Batcher(FLAGS.data_path, vocab, hps, single_pass=FLAGS.single_pass)
+  if FLAGS.two_models:
+    if hps.mode == 'train':
+      batcher = Batcher(FLAGS.data_path, vocab, hps, None, single_pass=FLAGS.single_pass)
+    else:
+      batcher_decode = Batcher(FLAGS.data_path, vocab, hps, FLAGS.log_root,  single_pass=FLAGS.single_pass)
+  else:
+    batcher = Batcher(FLAGS.data_path, vocab, hps, single_pass=FLAGS.single_pass)
 
   tf.set_random_seed(111) # a seed value for randomness
 
@@ -315,8 +324,11 @@ def main(unused_argv):
     decode_model_hps = hps  # This will be the hyperparameters for the decoder model
     decode_model_hps = hps._replace(max_dec_steps=1) # The model is configured with max_dec_steps=1 because we only ever run one step of the decoder at a time (to do beam search). Note that the batcher is initialized with max_dec_steps equal to e.g. 100 because the batches need to contain the full summaries
     model = SummarizationModel(decode_model_hps, vocab)
-    decoder = BeamSearchDecoder(model, batcher, vocab)
-    decoder.decode() # decode indefinitely (unless single_pass=True, in which case deocde the dataset exactly once)
+    if FLAGS.two_models:
+      decoder = BeamSearchDecoder(model, batcher_decode, vocab)
+    else:
+      decoder = BeamSearchDecoder(model, batcher, vocab)
+    decoder.decode() # decode indefinitely (unless single_pass=True, in which case decode the dataset exactly once)
   else:
     raise ValueError("The 'mode' flag must be one of train/eval/decode")
 
