@@ -75,6 +75,8 @@ tf.app.flags.DEFINE_boolean('debug', False, "Run in tensorflow's debug mode (wat
 # Two_models
 tf.app.flags.DEFINE_boolean('two_models', False, "Run the model from two_models branch.")
 
+# Coreference resolution pipeline
+tf.app.flags.DEFINE_boolean('coreference_resolution', False, 'If True, incorporate coreference resolution pipeline.')
 
 
 def calc_running_avg_loss(loss, running_avg_loss, summary_writer, step, decay=0.99):
@@ -295,7 +297,7 @@ def main(unused_argv):
     raise Exception("The single_pass flag should only be True in decode mode")
 
   # Make a namedtuple hps, containing the values of the hyperparameters that the model needs
-  hparam_list = ['mode', 'lr', 'adagrad_init_acc', 'rand_unif_init_mag', 'trunc_norm_init_std', 'max_grad_norm', 'hidden_dim', 'emb_dim', 'batch_size', 'max_dec_steps', 'max_enc_steps', 'coverage', 'cov_loss_wt', 'pointer_gen', 'two_models']
+  hparam_list = ['mode', 'lr', 'adagrad_init_acc', 'rand_unif_init_mag', 'trunc_norm_init_std', 'max_grad_norm', 'hidden_dim', 'emb_dim', 'batch_size', 'max_dec_steps', 'max_enc_steps', 'coverage', 'cov_loss_wt', 'pointer_gen', 'coreference_resolution', 'two_models']
   hps_dict = {}
   for key in hparam_list: # for each hyperparameter
     if hasattr(FLAGS, key): # if it was given on the command line

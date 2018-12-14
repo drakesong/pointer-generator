@@ -23,8 +23,9 @@ import time
 import numpy as np
 import tensorflow as tf
 import data
+from coreference_resolution import get_antecedent, run_coreference_resolution_for_training, run_coreference_resolution_for_testing
 import os
-from coreference_resolution import run_coreference_resolution_for_training, run_coreference_resolution_for_testing
+
 
 
 class Example(object):
@@ -81,8 +82,31 @@ class Example(object):
       # Get a verison of the reference summary where in-article OOVs are represented by their temporary article OOV id
       abs_ids_extend_vocab = data.abstract2ids(abstract_words, vocab, self.article_oovs)
 
-      # Overwrite decoder target sequence so it uses the temp article OOV ids
-      _, self.target = self.get_dec_inp_targ_seqs(abs_ids_extend_vocab, hps.max_dec_steps, start_decoding, stop_decoding)
+      if hps.coreference_resolution:
+        indices = []
+        antecedent = get_antecedent(abstract)
+        if antecedent != None:
+          for key in antecedent:
+            positions = [i for i, j in enumerate(abstract_words) if j == key]
+            if positions:
+              positions = np.asarray(positions)
+              closest_index = positions[(np.abs(positions - antecedent[key])).argmin()]
+              indices.append(closest_index)
+
+        idx = 0
+        if indices:
+          for i in range(len(abs_ids_extend_vocab)):
+            if i == indices[idx]:
+              if idx < len(indices)-1:
+                idx += 1
+              else:
+                continue
+            else:
+              abs_ids_extend_vocab[i] = 0
+        else:
+          # Overwrite decoder target sequence so it uses the temp article OOV ids
+          _, self.target = self.get_dec_inp_targ_seqs(abs_ids_extend_vocab, hps.max_dec_steps, start_decoding, stop_decoding)
+
 
     # Store the original strings
     self.original_article = article
